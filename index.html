@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUI App</title>
+    <script src="http://yui.yahooapis.com/3.18.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-app">
+    <div>
+        <input type="text" id="todoInput" placeholder="Add a new task">
+        <button id="addBtn">Add</button>
+    </div>
+    <ul id="todoList"></ul>       
+
+    <script>
+        YUI().use('app', 'view', 'router', 'node', function(Y) {
+          
+            Y.HelloView = Y.Base.create('helloView', Y.View, [], {
+
+                render: function () {
+                    var name = this.get('name');
+                    var age = this.get('age');
+                    var message = 'Hello ' + (name || 'World') + '!';
+                    if (age) {
+                        message += ' You are ' + age + ' years old.';
+                    }
+                    this.get('container').setHTML(message);
+                    return this;
+                }
+            });
+
+            // Create an app instance and register the HelloView
+            var app = new Y.App({
+                views: {
+                    hello: {type: 'HelloView'}
+                }
+            });
+
+            // Define routes for different views
+            app.route('/:name', function (req) {
+                var name = req.params.name;
+                this.showView('hello', {name: name, container: Y.one('#view-container')}); 
+            });
+
+            app.route('/:name/:age', function (req) {
+                var name = req.params.name;
+                var age = req.params.age;
+                this.showView('hello', {name: name, age: age, container: Y.one('#view-container')}); 
+            });
+
+            app.route('/', function (req) {
+                this.showView('hello', {container: Y.one('#view-container')});
+            });
+
+            // Render the app and save a history entry
+            app.render().save('/Krishna/45');
+        });
+
+        YUI().use('node', 'event', 'button', function (Y) {
+        const todoInput = Y.one('#todoInput');
+        const addBtn = Y.one('#addBtn');
+        const todoList = Y.one('#todoList');
+
+        // Function to create a new list item
+        function addTodo() {
+            const task = todoInput.get('value');
+            if (task.trim() !== "") {
+                const li = Y.Node.create('<li></li>');
+                li.setHTML(`${task} <button class="deleteBtn">Delete</button>`);
+                todoList.appendChild(li);
+                todoInput.set('value', '');
+
+                li.one('.deleteBtn').on('click', function() {
+                    li.remove();
+                });
+            }
+        }
+
+        // Add todo on click of the 'Add' button
+        addBtn.on('click', addTodo);
+
+        // Add todo on pressing the 'Enter' key
+        todoInput.on('keypress', function (e) {
+            if (e.keyCode === 13) {
+                addTodo();
+            }
+        });
+    });
+    </script>
+</body>
+</html>
